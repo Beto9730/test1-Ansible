@@ -1,0 +1,75 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+#### CUANTAS MAQUINAS VIRTUALES QUIERES CREAR?
+VM_NUMBER=4
+#### CUANTOS DISCOS QUIERES QUE TENGA CADA VM?
+DISK_NUMBER=0
+  (1..VM_NUMBER).each do |i|
+    config.vm.define "vm#{i}" do |node|
+        node.vm.box = "centos/7"
+        node.vm.hostname = "vm#{i}"
+        node.vm.network :private_network, ip: "10.0.0.1#{i}"
+        if i==3
+          node.vm.network "forwarded_port", guest: 5601, host: 5601
+        end
+        if i==1
+          node.vm.network "forwarded_port", guest: 80, host: "80"
+        end
+          node.vm.provider "virtualbox" do |vb|
+        if i==2 || i==3
+          vb.memory = "1500"
+        else
+          vb.memory = "350"
+        end
+        if i==4
+          node.vm.provision "shell", inline: <<-SHELL
+            echo "instalando wget"
+            sudo yum install wget -y
+
+            echo "descargando ansible"
+            sudo wget https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.5.7-1.el7.ans.noarch.rpm    
+
+            echo "instalando de manera local ansible"
+            sudo yum localinstall ansible-2.5.7-1.el7.ans.noarch.rpm -y
+
+            echo "check ansible version"
+            sudo ansible --version
+
+            echo "generando llave publica"
+            su - vagrant -c "ssh-keygen -q -t rsa -N '' -f /home/vagrant/.ssh/id_rsa"
+
+            echo "validando si se creo llave public"
+            cat /home/vagrant/.ssh/id_rsa.pub
+
+            echo "quitando la autenticacion con contraseña y reiniciando servicio sshd"
+            sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+            systemctl restart sshd.service
+
+            echo "corriendo playbook"
+            cd /vagrant/ansible && ansible-playbook -i inventory site-playbook.yml
+          SHELL
+        else
+          node.vm.provision "shell", inline: <<-SHELL
+            sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+            systemctl restart sshd.service
+          SHELL
+        end 
+          vb.cpus = 1
+      vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--controller", "IntelAHCI"] 
+  ######
+        (0..DISK_NUMBER).each do |p|
+          d=p
+          unless File.exist? ("extra_data_#{i}_#{p}_#{d}.vdi")
+            vb.customize ['createhd', '--filename', "extra_data_#{i}_#{p}_#{d}.vdi", '--size', 5 * 1024,'--format', "VDI"]
+          end
+          # unless File.exist? ("docker_data#{i}_#{p}_#{d}.vdi")
+          #   vb.customize ['createhd', '--filename', "docker_data_#{i}_#{p}_#{d}.vdi", '--size', 6 * 1024]
+          # end
+              vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', "#{p}", '--device', 0, '--type',  'hdd', '--medium', "extra_data_#{i}_#{p}_#{d}.vdi"]
+             # vb.customize ['storageattach', :id, '--storagectl', 'IDE', '--port', "#{p}", '--device', 0, '--type',  'hdd', '--medium', "docker_data_#{i}_#{p}_#{d}.vdi"]
+        end
+    end
+  end
+end
+end
