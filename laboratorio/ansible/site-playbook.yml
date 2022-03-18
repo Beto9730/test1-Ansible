@@ -1,0 +1,5 @@
+# Playbook para instalar NGINX
+- hosts: webservice 
+  become: yes 
+  roles:
+  - test-variables

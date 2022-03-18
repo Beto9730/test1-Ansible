@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 Vagrant.configure(2) do |config|
 #### CUANTAS MAQUINAS VIRTUALES QUIERES CREAR?
-VM_NUMBER=4
+VM_NUMBER=1
 #### CUANTOS DISCOS QUIERES QUE TENGA CADA VM?
 DISK_NUMBER=0
   (1..VM_NUMBER).each do |i|
@@ -10,19 +10,19 @@ DISK_NUMBER=0
         node.vm.box = "centos/7"
         node.vm.hostname = "vm#{i}"
         node.vm.network :private_network, ip: "10.0.0.1#{i}"
-        if i==3
+        if i==1
           node.vm.network "forwarded_port", guest: 5601, host: 5601
         end
         if i==1
           node.vm.network "forwarded_port", guest: 80, host: "80"
         end
           node.vm.provider "virtualbox" do |vb|
-        if i==2 || i==3
+        if i==1 
           vb.memory = "1500"
         else
           vb.memory = "350"
         end
-        if i==4
+        if i==1
           node.vm.provision "shell", inline: <<-SHELL
             echo "instalando wget"
             sudo yum install wget -y
@@ -36,24 +36,24 @@ DISK_NUMBER=0
             echo "check ansible version"
             sudo ansible --version
 
-            echo "generando llave publica"
-            su - vagrant -c "ssh-keygen -q -t rsa -N '' -f /home/vagrant/.ssh/id_rsa"
+            # echo "generando llave publica"
+            # su - vagrant -c "ssh-keygen -q -t rsa -N '' -f /home/vagrant/.ssh/id_rsa"
 
-            echo "validando si se creo llave public"
-            cat /home/vagrant/.ssh/id_rsa.pub
+            # echo "validando si se creo llave public"
+            # cat /home/vagrant/.ssh/id_rsa.pub
 
-            echo "quitando la autenticacion con contraseña y reiniciando servicio sshd"
-            sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-            systemctl restart sshd.service
+            # echo "quitando la autenticacion con contraseña y reiniciando servicio sshd"
+            # sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+            # systemctl restart sshd.service
 
-            echo "corriendo playbook"
-            cd /vagrant/ansible && ansible-playbook -i inventory site-playbook.yml
+            # echo "corriendo playbook"
+            # cd /vagrant/ansible && ansible-playbook -i inventory site-playbook.yml
           SHELL
-        else
-          node.vm.provision "shell", inline: <<-SHELL
-            sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-            systemctl restart sshd.service
-          SHELL
+        # else
+        #   node.vm.provision "shell", inline: <<-SHELL
+        #     sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+        #     systemctl restart sshd.service
+        #   SHELL
         end 
           vb.cpus = 1
       vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--controller", "IntelAHCI"] 
