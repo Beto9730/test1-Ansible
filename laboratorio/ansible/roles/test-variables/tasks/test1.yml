@@ -1,0 +1,9 @@
+---
+
+  - name: Copia ficheros
+    copy: 
+      src: /etc/tmpfiles.d/{{ item }}
+      dest: /tmpfiles.d/{{ item }}
+    with_items:
+      - prueba1.txt
+      - prueba2.txt
