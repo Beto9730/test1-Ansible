@@ -63,3 +63,6 @@ neon
 [clients:vars]
 invent_var=group-foo
 ```
+5. Precedencia de Variables
+
+-En general, Ansible da prioridad a las variables que se definieron más recientemente, de manera más activa y con un alcance más explícito. Las variables en la carpeta predeterminada dentro de un rol se anulan fácilmente. Cualquier cosa en el directorio vars del rol anula las versiones anteriores de esa variable en el espacio de nombres. Las variables de host y/o inventario anulan los valores predeterminados de funciones, pero las inclusiones explícitas, como el directorio vars o una include_varstarea, anulan las variables de inventario.

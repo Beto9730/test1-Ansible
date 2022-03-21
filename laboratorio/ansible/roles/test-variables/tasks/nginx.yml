@@ -3,34 +3,34 @@
     yum: 
       name: "{{ srv }}"
       state: latest 
+      
+  # - name: crear directorio html
+  #   file: 
+  #     path: /var/www/html
+  #     state: directory
+  #     owner: root
+  #     group: root
+  #     mode: '0755'
 
-  - name: crear directorio html
-    file: 
-      path: /var/www/html
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
+  # -name: copiar archivo de index.html template
+  #  become: yes
+  #  copy:
+  #         src: index.html
+  #         dest: /var/www/html
+  #         owner: root
+  #         group: root
+  #         mode: '0644'
 
-  -name: copiar archivo de index.html template
-   become: yes
-   copy:
-          src: index.html
-          dest: /var/www/html
-          owner: root
-          group: root
-          mode: '0644'
+  # -name: copiar archivo de configuracion NGINX
+  #  become: yes
+  #  copy:
+  #         src: configNGINX.conf
+  #         dest: /etc/nginx/conf.d
+  #         owner: root
+  #         group: root
+  #         mode: '0644'
 
-  -name: copiar archivo de configuracion NGINX
-   become: yes
-   copy:
-          src: configNGINX.conf
-          dest: /etc/nginx/conf.d
-          owner: root
-          group: root
-          mode: '0644'
-
-  -name: Iniciar serivico {{ srv }}
-   service:
-    name: "{{ srv }}"
-    state: started
+  # -name: Iniciar serivico {{ srv }}
+  #  service:
+  #   name: "{{ srv }}"
+  #   state: started

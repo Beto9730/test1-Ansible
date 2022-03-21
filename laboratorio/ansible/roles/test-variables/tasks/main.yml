@@ -1,4 +1,7 @@
 ---
 # tasks file for test-variables
 
-- include: nginx.yml 
+- include: nginx.yml
+- include: test1.yml
+- include: test2.yml
+ 
